@@ -1,0 +1,29 @@
+int find_user_by_id(int id);
+
+int find_user_by_username(string username);
+
+bool is_user_valid(string user_name, int password);
+
+void sign_up();
+
+int find_question(int question_id);
+
+void ask_question(int to_user_id, int from_user_id);
+
+void print_questions_from_me(string user_name);
+
+void print_questions_to_me(string user_name)
+
+void answer_question();
+
+void delete_question();
+
+void list_users();
+
+void answered_questions();
+
+void sign_in();
+
+void main_menu();
+
+int main();
