@@ -1,0 +1,441 @@
+int find_user_by_id(int id)
+{
+    for (int i = 0; i < cnt_users; i++)
+    {
+        if (id == users[i].id)
+        {
+            return i;
+        }
+    }
+}
+
+int find_user_by_username(string username)
+{
+    for (int i = 0; i < cnt_users; i++)
+    {
+        if (username == users[i].user_name)
+        {
+            return i;
+        }
+    }
+}
+
+bool is_user_valid(string user_name, int password)
+{
+    for (int i = 0; i < cnt_users; i++)
+    {
+        if (users[i].user_name == user_name && users[i].password == password)
+        {
+            return true;
+        }
+
+        else if ((users[i].user_name == user_name && users[i].password != password) || (users[i].password == password && users[i].user_name != user_name)) // Equivalent to XOR gate like: users[i].user_name != user_name XOR users[i].password != password
+        {
+            cout << "Invalid user name or password, please try again" << endl;
+            return false;
+        }
+    }
+
+    cout << "No such user with this information, please try again" << endl;
+    return false;
+}
+
+
+
+void sign_up()
+{
+    cout << "Enter user name: " << endl;
+    cin >> users[cnt_users].user_name;
+
+    cout << "Enter id: " << endl;
+    cin >> users[cnt_users].id;
+
+    cout << "Enter anonymous question status: " << endl;
+    cin >> users[cnt_users].AQ;
+
+    cout << "Enter password: " << endl;
+    cin >> users[cnt_users].password;
+
+    cout << "Enter name: " << endl;
+    cin >> users[cnt_users].name;
+
+    cout << "Enter email: " << endl;
+    cin >> users[cnt_users].email;
+
+    cnt_users++;
+}
+
+int find_question(int question_id)
+{
+    for (int i = 0; i < questions.size(); i++)
+    {
+        if (question_id == questions.at(i).question_id)
+            return i;
+    }
+    return -1;
+}
+
+
+
+
+
+void ask_question(int to_user_id, int from_user_id)
+{
+    int to_idx = find_user_by_id(to_user_id);
+
+    if (users[to_idx].AQ)
+        cout << "Note: Anonymous questions are allowed for this user" << endl;
+    else
+        cout << "Note: Anonymous questions aren't allowed for this user" << endl;
+
+    cout << "For thread question: enter question id or -1 for new question" << endl;
+
+    int choice;
+    cin >> choice;
+
+    if (choice != -1) // Now choice = question id
+    {
+        int question_idx = find_question(choice);
+        if (question_idx != -1)
+        {
+            thread temp;
+            temp.from_id = from_user_id;
+            temp.to_id = to_user_id;
+            temp.thread_id = questions_id++;
+
+            cout << "Enter question text: ";
+            cin >> temp.question;
+
+            questions.at(question_idx).threads.push_back(temp);
+        }
+
+        else
+            cout << "There is no such question with this id" << endl;
+    }
+
+    else
+    {
+        question temp;
+        temp.from_id = from_user_id;
+        temp.to_id = to_user_id;
+        temp.question_id = questions_id++;
+
+        cout << "Enter question text: ";
+        cin >> temp.question_text;
+
+        questions.push_back(temp);
+    }
+}
+
+void print_questions_from_me(string user_name)
+{
+    bool wether = false;
+    int from_user_id = users[find_user_by_username(user_name)].id;
+
+    for (int i = 0; i < questions.size(); i++)
+    {
+        if (from_user_id == questions.at(i).from_id)
+        {
+            wether = true;
+            cout << "Question id (" << questions.at(i).question_id << ") to user id (" << questions.at(i).to_id << ")           ";
+            cout << "Question: " << questions.at(i).question_text << endl << "         ";
+            cout << "Answer: " << questions.at(i).answer;
+            if (i != questions.size() - 1)
+                cout << endl << "         ";
+            else cout << endl;
+
+            if (questions.at(i).threads.size())
+            {
+                for (int a = 0; a < questions.at(i).threads.size(); a++)
+                {
+                    cout << "Thread: Question id (" << questions.at(i).threads.at(a).thread_id << ") to user_id (" << questions.at(i).threads.at(a).to_id << ")            " << questions.at(i).threads.at(a).question << endl << "         ";
+                    cout << "Answer: " << questions.at(i).threads.at(a).answer;
+                    if (a != questions.at(i).threads.size() - 1)
+                        cout << endl << "         ";
+                    else cout << endl;
+                }
+            }
+        }
+    }
+
+    if (!wether)
+        cout << "There are no questions from you" << endl;
+}
+
+
+
+void print_questions_to_me(string user_name)
+{
+    bool wether = false;
+    int to_user_id = users[find_user_by_username(user_name)].id;
+
+    for (int i = 0; i < questions.size(); i++)
+    {
+        if (to_user_id == questions.at(i).to_id)
+        {
+            wether = true;
+            cout << "Question id (" << questions.at(i).question_id << ") from user id (" << questions.at(i).from_id << ")           ";
+            cout << "Question: " << questions.at(i).question_text << endl << "         ";
+            cout << "Answer: " << questions.at(i).answer;
+            if (i != questions.size() - 1)
+                cout << endl << "         ";
+            else cout << endl;
+
+            if (questions.at(i).threads.size())
+            {
+                for (int a = 0; a < questions.at(i).threads.size(); a++)
+                {
+                    cout << "Thread: Question id (" << questions.at(i).threads.at(a).thread_id << ") from user_id (" << questions.at(i).threads.at(a).from_id << ")            " << questions.at(i).threads.at(a).question << endl << "         ";
+                    cout << "Answer: " << questions.at(i).threads.at(a).answer;
+                    if (a != questions.at(i).threads.size() - 1)
+                        cout << endl << "         ";
+                    else cout << endl;
+                }
+            }
+        }
+    }
+
+    if (!wether)
+        cout << "There are no questions to you" << endl;
+}
+
+
+void answer_question()
+{
+    cout << "Enter question_id or -1 to cancel" << endl;
+    int question_id;
+    cin >> question_id;
+
+    if (question_id == -1)
+        return;
+
+    for (int i = 0; i < questions.size(); i++)
+    {
+        if (question_id == questions.at(i).question_id)
+        {
+            cout << "Question id (" << question_id << ") from user id (" << questions[i].from_id << ")              Question: " << questions[i].question_text << endl << "                Answer: " << questions[i].answer << endl << endl;
+            if (questions[i].answer != "No answer yet")
+                cout << "Warning: already answered, answer will be updated." << endl;
+
+            cout << "Enter answer: ";
+            cin >> questions[i].answer;
+            return;
+        }
+    }
+
+    for (int x = 0; x < questions.size(); x++)
+    {
+        for (int y = 0; y < questions[x].threads.size(); y++)
+        {
+            if (question_id == questions[x].threads[y].thread_id)
+            {
+                cout << "Question id (" << question_id << ") from user id (" << questions[x].threads[y].from_id << ")              Question: " << questions[x].threads[y].question << endl << "                Answer: " << questions[x].threads[y].answer << endl << endl;
+                if (questions[x].threads[y].answer != "No answer yet")
+                    cout << "Warning: already answered, answer will be updated." << endl;
+
+                cout << "Enter answer: ";
+                cin >> questions[x].threads[y].answer;
+                return;
+            }
+        }
+    }
+
+    cout << "No such question with this id" << endl;
+    return;
+}
+
+
+void delete_question()
+{
+    cout << "Enter question id or -1 to cancel: ";
+    int question_id;
+    cin >> question_id;
+
+    if (question_id == -1)
+        return;
+
+    for (int i = 0; i < questions.size(); i++)
+    {
+        if (question_id == questions.at(i).question_id)
+        {
+            questions.erase(questions.begin() + i);
+            return;
+        }
+    }
+
+    for (int x = 0; x < questions.size(); x++)
+    {
+        for (int y = 0; y < questions[x].threads.size(); y++)
+        {
+            if (question_id == questions[x].threads[y].thread_id)
+            {
+                questions[x].threads.erase(questions[x].threads.begin() + y);
+            }
+        }
+    }
+}
+
+
+void list_users()
+{
+    for (int i = 0; i < cnt_users; i++)
+    {
+        cout << "ID: " << users[i].id << "           " << "Name: " << users[i].name << endl;
+    }
+}
+
+
+void answered_questions()
+{
+    bool wether = false;
+
+    for (int i = 0; i < questions.size(); i++)
+    {
+        if (questions[i].answer != "No answer yet")
+        {
+            wether = true;
+            cout << "Question id (" << questions[i].question_id << ") from user id (" << questions[i].from_id << ") To user id (" << questions[i].to_id << ")                Question: " << questions[i].question_text << endl << "         ";
+            cout << "Answer: " << questions[i].answer << endl;
+
+            if (questions[i].threads.size())
+            {
+                for (int x = 0; x < questions[i].threads.size(); x++)
+                {
+                    cout << "Thread: Question id (" << questions[i].threads[x].thread_id << ") from user id (" << questions[i].threads[x].from_id << ") To user id (" << questions[i].threads[x].to_id << ")                Question: " << questions[i].threads[x].question << endl << "         ";
+                    cout << "Answer: " << questions[i].threads[x].answer << endl;
+                }
+            }
+        }
+    }
+
+    if (!wether)
+        cout << "There are no answered questions" << endl;
+}
+
+void sign_in()
+{
+    cout << "Enter user name & password" << endl;
+    string user_name;
+    int password;
+    cin >> user_name >> password;
+
+    while (true)
+    {
+        if (!is_user_valid(user_name, password))
+        {
+            cin >> user_name >> password;
+        }
+        else break;
+    }
+
+    while (true)
+    {
+        cout << "Menu: " << endl;
+        cout << "1: Print questions to me" << endl;
+        cout << "2: Print questions from me " << endl;
+        cout << "3: Answer question " << endl;
+        cout << "4: Delete question " << endl;
+        cout << "5: Ask question " << endl;
+        cout << "6: List system users" << endl;
+        cout << "7: Feed" << endl;
+        cout << "8: Logout" << endl;
+
+        cout << "Enter number in range 1-8: " << endl;
+        int n;
+        cin >> n;
+
+        while (!(1 <= n && n <= 8))
+        {
+            cout << "Invalid input, please try again" << endl;
+            cin >> n;
+        }
+
+        if (n == 1)
+        {
+            print_questions_to_me(user_name);
+        }
+
+        else if (n == 2)
+            print_questions_from_me(user_name);
+
+        else if (n == 3)
+            answer_question();
+
+        else if (n == 4)
+            delete_question();
+
+        else if (n == 5)
+        {
+            cout << "Enter user id or -1 to cancel" << endl;
+            int choice;
+            cin >> choice;
+
+            if (choice != -1)
+            {
+                int from_user_id = users[find_user_by_username(user_name)].id;
+                ask_question(choice, from_user_id);
+            }
+        }
+
+
+        else if (n == 6)
+            list_users();
+
+        else if (n == 7)
+            answered_questions();
+
+        else if (n == 8)
+        {
+            cout << "Menu:" << endl << "1: Login" << endl << "2: Sign up" << endl;
+            int choice;
+            cin >> choice;
+
+            while (!(choice == 1 || choice == 2))
+            {
+                cout << "Please enter valid input" << endl;
+                cin >> choice;
+            }
+
+            if (choice == 1)
+                sign_in();
+
+            else if (choice == 2)
+                sign_up();
+
+            else
+                cout << "Please enter a valid input" << endl;
+        }
+    }
+}
+
+
+void main_menu()
+{
+    cout << "Menu:" << endl << "1: Login" << endl << "2: Sign up" << endl;
+    int choice;
+    cin >> choice;
+
+    while (!(choice == 1 || choice == 2))
+    {
+        cout << "Please enter valid input" << endl;
+        cin >> choice;
+    }
+
+    if (choice == 1)
+        sign_in();
+
+    else if (choice == 2)
+        sign_up();
+
+    else
+        cout << "Please enter a valid input" << endl;
+}
+
+int main()
+{
+    while (true)
+    {
+        main_menu();
+    }
+    return 0;
+}
